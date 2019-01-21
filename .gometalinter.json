@@ -1,0 +1,20 @@
+{
+  "Deadline": "2m",
+  "Vendor": true,
+  "Test": true,
+
+  "Enable": [
+    "deadcode",
+    "errcheck",
+    "goconst",
+    "golint",
+    "gotype",
+    "gotypex",
+    "ineffassign",
+    "interfacer",
+    "nakedret",
+    "staticcheck",
+    "structcheck",
+    "unconvert"
+  ]
+}
