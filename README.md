@@ -1,0 +1,3 @@
+# vsm
+
+Vehicle state machine.
