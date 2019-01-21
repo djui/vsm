@@ -1,9 +1,15 @@
 package vsm
 
+import (
+	"sync"
+)
+
 // VSM is a finite state machine for an abstract vehicle.
 type VSM struct {
 	graph map[State]map[State][]Role
 
+	// Mutex protecting state changes.
+	muState sync.Mutex
 	state   State
 }
 
@@ -33,6 +39,9 @@ func New(transitions []Transition) *VSM {
 
 // Transition executes a state transition after successful validation.
 func (m *VSM) Transition(state State, role Role) error {
+	m.muState.Lock()
+	defer m.muState.Unlock()
+
 	// Allow admin override
 	if role != RoleAdmin {
 		// Check if transition is valid
