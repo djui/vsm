@@ -12,6 +12,49 @@ func TestInitState(t *testing.T) {
 	assert.Equal(t, m.state, StateReady)
 }
 
+func TestDefaultEvents(t *testing.T) {
+	cases := []struct {
+		initState     State
+		givenEvent    Event
+		givenRole     Role
+		expectedState State
+	}{
+		{StateReady, EventStartRide, RoleEndUser, StateRiding},
+		{StateRiding, EventEndRide, RoleEndUser, StateReady},
+
+		{StateReady, EventNighttime, RoleAutomatic, StateBounty},
+		{StateReady, EventExpire, RoleAutomatic, StateUnknown},
+		{StateRiding, EventSafeBattery, RoleAutomatic, StateBatteryLow},
+		{StateBatteryLow, EventNotifyHunter, RoleAutomatic, StateBounty},
+
+		{StateReady, EventStartRide, RoleHunter, StateRiding},
+		{StateRiding, EventEndRide, RoleHunter, StateReady},
+		{StateBounty, EventCollect, RoleHunter, StateCollected},
+		{StateCollected, EventReturn, RoleHunter, StateDropped},
+		{StateDropped, EventDistribute, RoleHunter, StateReady},
+	}
+
+	m := New(DefaultTransitions)
+
+	for _, tc := range cases {
+		t.Run(tc.givenEvent.String(), func(t *testing.T) {
+			// Arrange
+
+			m.state = tc.initState
+
+			// Act
+
+			err := m.Transition(tc.givenEvent.State, tc.givenRole)
+
+			// Assert
+
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedState, m.state)
+		})
+	}
+
+}
+
 func TestInvalidTransition(t *testing.T) {
 	// Arrange
 
