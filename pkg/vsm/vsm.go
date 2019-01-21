@@ -33,6 +33,20 @@ func New(transitions []Transition) *VSM {
 
 // Transition executes a state transition after successful validation.
 func (m *VSM) Transition(state State, role Role) error {
+	// Allow admin override
+	if role != RoleAdmin {
+		// Check if transition is valid
+		roles, valid := m.graph[m.state][state]
+		if !valid {
+			return &ErrInvalidTransition{from: m.state, to: state}
+		}
+
+		// Check if permissions are valid
+		if !role.IsMember(roles) {
+			return &ErrInvalidPermission{role: role, permitted: roles}
+		}
+	}
+
 	m.state = state
 	return nil
 }
